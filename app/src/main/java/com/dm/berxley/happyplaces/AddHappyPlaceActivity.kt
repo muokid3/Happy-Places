@@ -7,13 +7,17 @@ import android.Manifest.permission.READ_MEDIA_VIDEO
 import android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
 import android.app.Activity
 import android.app.DatePickerDialog
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.icu.util.Calendar
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
@@ -29,8 +33,13 @@ import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.UUID
 
 
 class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
@@ -110,7 +119,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                 override fun onPermissionGranted(response: PermissionGrantedResponse?) {
                     //TODO open camera
                     val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    startActivityForResult(intent,100)
+                    startActivityForResult(intent, CAMERA)
                 }
 
                 override fun onPermissionDenied(response: PermissionDeniedResponse?) {
@@ -153,10 +162,34 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == Activity.RESULT_OK){
-            if (requestCode == 100){
+            if (requestCode == CAMERA){
                 val thumbNail : Bitmap = data!!.extras!!.get("data") as Bitmap
+                val saveImageToInternalStorage = saveImageToInternalStorage(thumbNail)
+                Log.e("saved image: ", "Path: $saveImageToInternalStorage")
                 ivPlaceImage?.setImageBitmap(thumbNail)
             }
         }
+    }
+
+    private fun saveImageToInternalStorage(bitmap: Bitmap) : Uri{
+        val wrapper = ContextWrapper(applicationContext)
+        var file = wrapper.getDir(IMAGE_DIRECTORY, Context.MODE_PRIVATE)
+        file = File(file, "${UUID.randomUUID()}.jpg")
+
+        try {
+            val stream: OutputStream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+            stream.flush()
+            stream.close()
+        }catch (e: IOException){
+            e.printStackTrace()
+        }
+
+        return  Uri.parse(file.absolutePath)
+    }
+
+    companion object {
+        private const val CAMERA = 100
+        private const val IMAGE_DIRECTORY = "HappyPlacesImages"
     }
 }
