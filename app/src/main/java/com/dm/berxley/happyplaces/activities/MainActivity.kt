@@ -1,8 +1,9 @@
-package com.dm.berxley.happyplaces
+package com.dm.berxley.happyplaces.activities
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.dm.berxley.happyplaces.R
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
