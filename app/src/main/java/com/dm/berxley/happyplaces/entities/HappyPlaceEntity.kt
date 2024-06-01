@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "happy_places")
 data class HappyPlaceEntity (
     @PrimaryKey(autoGenerate = true)
-    val  id: Int,
+    val  id: Int = 0,
     val title: String?,
     val image: String?,
     val description: String?,

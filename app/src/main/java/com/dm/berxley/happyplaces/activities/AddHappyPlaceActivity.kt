@@ -2,6 +2,7 @@ package com.dm.berxley.happyplaces.activities
 
 import android.Manifest
 import android.app.Activity
+import android.app.Application
 import android.app.DatePickerDialog
 import android.content.Context
 import android.content.ContextWrapper
@@ -14,19 +15,26 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.lifecycleScope
 import com.dm.berxley.happyplaces.R
+import com.dm.berxley.happyplaces.daos.HappyPlaceDao
+import com.dm.berxley.happyplaces.entities.HappyPlaceEntity
+import com.dm.berxley.happyplaces.utils.HappyPlaceApp
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -38,9 +46,14 @@ import java.util.UUID
 
 class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
     private var toolbar: Toolbar? = null
+    private var etTitle:  EditText? = null
+    private var etDescription: EditText? = null
     private var etDate: EditText? = null
+    private var etLocation: EditText? = null
+    private var imagePath: String? = null
     private var tvAddImage: TextView? = null
     private var ivPlaceImage: ImageView? = null
+    private var btnSave: Button? = null
     private var cal = Calendar.getInstance()
     private lateinit var dateSetListener: DatePickerDialog.OnDateSetListener
 
@@ -55,6 +68,9 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             onBackPressed()
         }
 
+        etTitle = findViewById(R.id.et_title)
+        etDescription = findViewById(R.id.et_description)
+        etLocation = findViewById(R.id.et_location)
         ivPlaceImage = findViewById(R.id.iv_place_image)
 
         etDate = findViewById(R.id.et_date)
@@ -62,6 +78,9 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
 
         tvAddImage = findViewById(R.id.tv_add_image)
         tvAddImage?.setOnClickListener(this)
+
+        btnSave = findViewById(R.id.btn_save)
+        btnSave?.setOnClickListener(this)
 
         dateSetListener = DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
             cal.set(Calendar.YEAR, year)
@@ -101,7 +120,74 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 pictureDialog.show()
             }
+
+            R.id.btn_save -> {
+                val happyPlaceDao = (application as HappyPlaceApp).db.employeeDao()
+                addHappyPlace(happyPlaceDao = happyPlaceDao)
+            }
         }
+    }
+
+    private fun addHappyPlace(happyPlaceDao: HappyPlaceDao){
+
+        if (checkNulls()){
+            lifecycleScope.launch {
+                happyPlaceDao.insert(HappyPlaceEntity(
+                    title = etTitle?.text.toString(),
+                    description = etDescription?.text.toString(),
+                    image = imagePath,
+                    date = etDate?.text.toString(),
+                    location = etLocation?.text.toString(),
+                    lat = 0.0,
+                    lng = 0.0))
+
+                etTitle?.text?.clear()
+                etDescription?.text?.clear()
+                imagePath=null
+                etDate?.text?.clear()
+                etLocation?.text?.clear()
+                ivPlaceImage?.setImageDrawable(getDrawable(R.drawable.add_screen_image_placeholder))
+
+                AlertDialog.Builder(this@AddHappyPlaceActivity)
+                    .setTitle("Success")
+                    .setMessage("Happy Place has been added. You can continue adding more or go back to homepage to see your happy places.")
+                    .setPositiveButton("Ok",DialogInterface.OnClickListener { dialog, _ ->
+                        dialog.dismiss()
+                    }).show()
+            }
+        }
+
+    }
+
+    private fun checkNulls(): Boolean{
+        var success = true
+
+        if (etTitle?.text?.isEmpty() == true){
+            etTitle?.error = "Title is required"
+            success= false
+        }
+
+        if (etDescription?.text?.isEmpty() == true){
+            etDescription?.error = "Description is required"
+            success= false
+        }
+        if (etDate?.text?.isEmpty() == true){
+            etDate?.error = "Date is required"
+            success= false
+        }
+
+        if (etLocation?.text?.isEmpty() == true){
+            etLocation?.error = "Location is required"
+            success= false
+        }
+
+        if (imagePath == null){
+            Toast.makeText(this, "Please upload an image from the camera", Toast.LENGTH_SHORT)
+                .show()
+            success= false
+        }
+
+        return success
     }
 
     private fun choosePhotoFromCamera() {
@@ -159,6 +245,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             if (requestCode == CAMERA){
                 val thumbNail : Bitmap = data!!.extras!!.get("data") as Bitmap
                 val saveImageToInternalStorage = saveImageToInternalStorage(thumbNail)
+                imagePath = saveImageToInternalStorage.toString()
                 Log.e("saved image: ", "Path: $saveImageToInternalStorage")
                 ivPlaceImage?.setImageBitmap(thumbNail)
             }

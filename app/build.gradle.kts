@@ -52,6 +52,8 @@ dependencies {
     implementation("androidx.room:room-ktx:$room_version")
     //kotlin extensions for coroutine support with activities
     implementation("androidx.activity:activity-ktx:$activity_version")
+    kapt ("androidx.room:room-compiler:$room_version")
+
 
 
     implementation("androidx.core:core-ktx:1.12.0")
