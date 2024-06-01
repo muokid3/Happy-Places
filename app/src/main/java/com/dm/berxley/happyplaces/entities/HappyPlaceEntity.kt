@@ -2,6 +2,7 @@ package com.dm.berxley.happyplaces.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 @Entity(tableName = "happy_places")
 data class HappyPlaceEntity (
@@ -15,4 +16,4 @@ data class HappyPlaceEntity (
     val lat: Double?,
     val lng: Double?,
 
-)
+): Serializable

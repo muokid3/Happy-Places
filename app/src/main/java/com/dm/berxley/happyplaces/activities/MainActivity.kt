@@ -41,6 +41,14 @@ class MainActivity : AppCompatActivity() {
                     adapter = HappyPlacesAdapter(this@MainActivity,list)
                     recyclerView?.adapter = adapter
 
+                    adapter?.setOnClickListener(object : HappyPlacesAdapter.OnClickListener{
+                        override fun onClick(id: Int, model: HappyPlaceEntity) {
+                            val intent = Intent(this@MainActivity, HappyPlaceDetailsActivity::class.java)
+                            intent.putExtra(EXTRA_PLACE_DETAILS, model)
+                            startActivity(intent)
+                        }
+                    })
+
 
                     recyclerView?.visibility = View.VISIBLE
                     tvNotFound?.visibility = View.GONE
@@ -60,5 +68,9 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, AddHappyPlaceActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    companion object {
+        const val EXTRA_PLACE_DETAILS = "extra_place_details"
     }
 }
