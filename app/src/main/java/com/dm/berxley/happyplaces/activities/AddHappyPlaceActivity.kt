@@ -2,7 +2,6 @@ package com.dm.berxley.happyplaces.activities
 
 import android.Manifest
 import android.app.Activity
-import android.app.Application
 import android.app.DatePickerDialog
 import android.content.Context
 import android.content.ContextWrapper
@@ -93,6 +92,8 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         }
 
 
+
+
     }
 
     override fun onClick(v: View?) {
@@ -122,7 +123,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             R.id.btn_save -> {
-                val happyPlaceDao = (application as HappyPlaceApp).db.employeeDao()
+                val happyPlaceDao = (application as HappyPlaceApp).db.happyPlaceDao()
                 addHappyPlace(happyPlaceDao = happyPlaceDao)
             }
         }

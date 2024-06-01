@@ -42,6 +42,7 @@ android {
 
 dependencies {
 
+    implementation("androidx.activity:activity:1.9.0")
     val room_version = "2.6.1"
     val activity_version = "1.9.0"
 
@@ -65,5 +66,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
     implementation ("com.karumi:dexter:6.2.3")
+    implementation ("de.hdodenhof:circleimageview:3.1.0")
+
 
 }

@@ -6,6 +6,21 @@
     android:layout_height="match_parent"
     tools:context=".activities.MainActivity">
 
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/tvNotFound"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/no_happy_places_found_yet_kindly_add_one"
+        android:textSize="@dimen/edit_text_text_size"
+        android:gravity="center"
+        android:visibility="visible"/>
     
     
     <com.google.android.material.floatingactionbutton.FloatingActionButton

@@ -9,7 +9,7 @@ import com.dm.berxley.happyplaces.entities.HappyPlaceEntity
 
 @Database(entities = [HappyPlaceEntity::class], version = 1)
 abstract class DatabaseHandler : RoomDatabase() {
-    abstract  fun employeeDao(): HappyPlaceDao
+    abstract  fun happyPlaceDao(): HappyPlaceDao
 
     companion object {
         @Volatile
