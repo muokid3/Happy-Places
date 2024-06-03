@@ -1,19 +1,23 @@
 package com.dm.berxley.happyplaces.activities
 
+import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dm.berxley.happyplaces.R
 import com.dm.berxley.happyplaces.adapters.HappyPlacesAdapter
+import com.dm.berxley.happyplaces.daos.HappyPlaceDao
 import com.dm.berxley.happyplaces.entities.HappyPlaceEntity
 import com.dm.berxley.happyplaces.utils.HappyPlaceApp
+import com.dm.berxley.happyplaces.utils.SwipeToDeleteCallback
 import com.dm.berxley.happyplaces.utils.SwipeToEditCallback
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.flow.count
@@ -25,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     private var recyclerView: RecyclerView? = null
     private var tvNotFound: TextView? = null
     private var adapter: HappyPlacesAdapter? = null
+    private var list: ArrayList<HappyPlaceEntity>? = null
+    private var happyPlaceDao: HappyPlaceDao? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,13 +40,13 @@ class MainActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView?.layoutManager = LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
 
-        val happyPlaceDao = (application as HappyPlaceApp).db.happyPlaceDao()
+        happyPlaceDao = (application as HappyPlaceApp).db.happyPlaceDao()
         lifecycleScope.launch {
-            happyPlaceDao.getAllHappyPlaces().collect {
-                val list = ArrayList(it)
+            happyPlaceDao?.getAllHappyPlaces()?.collect {
+                list = ArrayList(it)
 
-                if (list.isNotEmpty()){
-                    adapter = HappyPlacesAdapter(this@MainActivity,list)
+                if (list!!.isNotEmpty()){
+                    adapter = HappyPlacesAdapter(this@MainActivity,list!!)
                     recyclerView?.adapter = adapter
 
                     adapter?.setOnClickListener(object : HappyPlacesAdapter.OnClickListener{
@@ -68,9 +74,32 @@ class MainActivity : AppCompatActivity() {
                 adapter?.notifyEditItem(this@MainActivity, viewHolder.adapterPosition, ADD_PLACE_ACTIVITY_REQUEST_CODE)
             }
         }
+        val editItemHelper = ItemTouchHelper(editCallBack)
+        editItemHelper.attachToRecyclerView(recyclerView)
 
-        val touchItemHelper = ItemTouchHelper(editCallBack)
-        touchItemHelper.attachToRecyclerView(recyclerView)
+
+        val deleteCallBack = object : SwipeToDeleteCallback(this){
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+
+                val item = list!![viewHolder.adapterPosition]
+
+                lifecycleScope.launch {
+                    happyPlaceDao?.delete(item)
+
+                    AlertDialog.Builder(this@MainActivity)
+                        .setTitle("Delete Successful")
+                        .setMessage("Item has been deleted successfully")
+                        .setPositiveButton("Ok", DialogInterface.OnClickListener { dialog, which -> {
+                            dialog.dismiss()
+                        } })
+                        .show()
+                }
+            }
+        }
+        val deleteItemHelper = ItemTouchHelper(deleteCallBack)
+        deleteItemHelper.attachToRecyclerView(recyclerView)
+
+
 
         fabAddHappyPlace = findViewById(R.id.fabAddHappyPlace)
         fabAddHappyPlace?.setOnClickListener {

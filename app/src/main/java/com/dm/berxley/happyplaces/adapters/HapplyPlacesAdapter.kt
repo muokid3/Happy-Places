@@ -3,6 +3,7 @@ package com.dm.berxley.happyplaces.adapters
 
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.view.LayoutInflater
@@ -10,11 +11,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.dm.berxley.happyplaces.R
 import com.dm.berxley.happyplaces.activities.AddHappyPlaceActivity
 import com.dm.berxley.happyplaces.activities.MainActivity
 import com.dm.berxley.happyplaces.entities.HappyPlaceEntity
+import com.dm.berxley.happyplaces.utils.HappyPlaceApp
 
 open class HappyPlacesAdapter(
     private val context: Context,
