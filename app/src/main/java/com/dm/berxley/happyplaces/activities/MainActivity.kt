@@ -7,12 +7,14 @@ import android.view.View
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dm.berxley.happyplaces.R
 import com.dm.berxley.happyplaces.adapters.HappyPlacesAdapter
 import com.dm.berxley.happyplaces.entities.HappyPlaceEntity
 import com.dm.berxley.happyplaces.utils.HappyPlaceApp
+import com.dm.berxley.happyplaces.utils.SwipeToEditCallback
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.launch
@@ -61,7 +63,14 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val editCallBack = object : SwipeToEditCallback(this){
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                adapter?.notifyEditItem(this@MainActivity, viewHolder.adapterPosition, ADD_PLACE_ACTIVITY_REQUEST_CODE)
+            }
+        }
 
+        val touchItemHelper = ItemTouchHelper(editCallBack)
+        touchItemHelper.attachToRecyclerView(recyclerView)
 
         fabAddHappyPlace = findViewById(R.id.fabAddHappyPlace)
         fabAddHappyPlace?.setOnClickListener {
@@ -72,5 +81,6 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_PLACE_DETAILS = "extra_place_details"
+        const val ADD_PLACE_ACTIVITY_REQUEST_CODE = 200
     }
 }

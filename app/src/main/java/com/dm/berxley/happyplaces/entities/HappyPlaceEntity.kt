@@ -8,12 +8,12 @@ import java.io.Serializable
 data class HappyPlaceEntity (
     @PrimaryKey(autoGenerate = true)
     val  id: Int = 0,
-    val title: String?,
-    val image: String?,
-    val description: String?,
-    val date: String?,
-    val location: String?,
-    val lat: Double?,
-    val lng: Double?,
+    var title: String?,
+    var image: String?,
+    var description: String?,
+    var date: String?,
+    var location: String?,
+    var lat: Double?,
+    var lng: Double?,
 
 ): Serializable

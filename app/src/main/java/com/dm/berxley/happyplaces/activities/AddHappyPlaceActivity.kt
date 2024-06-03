@@ -55,6 +55,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
     private var btnSave: Button? = null
     private var cal = Calendar.getInstance()
     private lateinit var dateSetListener: DatePickerDialog.OnDateSetListener
+    private var mHappyPlace: HappyPlaceEntity? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +92,24 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             etDate?.setText(sdf.format(cal.time).toString())
         }
 
+        if (intent.hasExtra(MainActivity.EXTRA_PLACE_DETAILS)){
+            mHappyPlace = intent.getSerializableExtra(MainActivity.EXTRA_PLACE_DETAILS) as HappyPlaceEntity
+        }
+
+        if (mHappyPlace != null){
+            supportActionBar?.title = "Edit Happy Place"
+
+            etTitle?.setText(mHappyPlace!!.title)
+            etLocation?.setText(mHappyPlace!!.location)
+            etDescription?.setText(mHappyPlace!!.description)
+            etDate?.setText(mHappyPlace!!.date)
+
+            imagePath = mHappyPlace!!.image
+            ivPlaceImage?.setImageURI(Uri.parse(imagePath))
+
+            btnSave?.text = "Update"
+        }
+
 
 
 
@@ -124,7 +143,11 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
 
             R.id.btn_save -> {
                 val happyPlaceDao = (application as HappyPlaceApp).db.happyPlaceDao()
-                addHappyPlace(happyPlaceDao = happyPlaceDao)
+                if (mHappyPlace != null){
+                    updateHappyPlace(happyPlaceDao = happyPlaceDao)
+                }else{
+                    addHappyPlace(happyPlaceDao = happyPlaceDao)
+                }
             }
         }
     }
@@ -154,6 +177,29 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                     .setMessage("Happy Place has been added. You can continue adding more or go back to homepage to see your happy places.")
                     .setPositiveButton("Ok",DialogInterface.OnClickListener { dialog, _ ->
                         dialog.dismiss()
+                    }).show()
+            }
+        }
+
+    }
+
+    private fun updateHappyPlace(happyPlaceDao: HappyPlaceDao){
+
+        if (checkNulls()){
+            lifecycleScope.launch {
+                mHappyPlace?.date = etDate?.text.toString()
+                mHappyPlace?.title = etTitle?.text.toString()
+                mHappyPlace?.description = etDescription?.text.toString()
+                mHappyPlace?.image = imagePath
+                mHappyPlace?.location = etLocation?.text.toString()
+                happyPlaceDao.update(mHappyPlace!!)
+
+                AlertDialog.Builder(this@AddHappyPlaceActivity)
+                    .setTitle("Success")
+                    .setMessage("Happy Place has been updated.")
+                    .setPositiveButton("Ok",DialogInterface.OnClickListener { dialog, _ ->
+                        dialog.dismiss()
+                        finish()
                     }).show()
             }
         }
